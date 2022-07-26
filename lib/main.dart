@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
-import './models/detail_screen.dart';
+import './widgets/detail_screen.dart';
 import './widgets/list_item.dart';
 import './widgets/shimmer_list.dart';
 
