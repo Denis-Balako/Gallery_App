@@ -33,6 +33,7 @@ class ListItem extends StatelessWidget {
               )
             : CircleAvatar(
                 backgroundImage: avatar.image,
+                backgroundColor: Colors.white,
               ),
         title: Text(
           author,

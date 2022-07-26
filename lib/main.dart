@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 import './models/detail_screen.dart';
 import './widgets/list_item.dart';
+import './widgets/shimmer_list.dart';
 
 void main() {
   runApp(const Main());
@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'https://api.unsplash.com/photos/?client_id=ab3411e4ac868c2646c0ed488dfd919ef612b04c264f3374c97fff98ed253dc9');
   bool _showImg = false;
 
-  Future<void> getImages() async {
+  Future<void> _getImages() async {
     http.Response response = await http.get(_url);
     List<dynamic> imgData = json.decode(response.body);
 
@@ -117,59 +117,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_showImg) {
-      getImages();
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: !_showImg
-          ? Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: ListView.builder(
-                itemCount: 10,
-                // separatorBuilder: (BuildContext context, int index) => const Divider(
-                //   color: Colors.black54,
-                // ),
-                itemBuilder: (_, __) => Padding(
-                  padding: const EdgeInsets.all(11.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(40),
-                          ),
-                        ),
-                        width: 48.0,
-                        height: 48.0,
-                        // color: Colors.white,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Container(
-                              width: double.infinity,
-                              height: 18.0,
-                              color: Colors.white,
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            )
+          ? ShimmerList(handler: () async => await _getImages())
           : Scrollbar(
               child: ListView.builder(
                 itemCount: _images.length,
