@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class DetailScreen extends StatelessWidget {
-  final String imagePath;
+  final Image image;
 
   const DetailScreen({
     super.key,
-    required this.imagePath,
+    required this.image,
   });
 
   @override
@@ -21,7 +21,7 @@ class DetailScreen extends StatelessWidget {
           child: Center(
             child: Hero(
               tag: 'imageHero',
-              child: Image(image: NetworkImage(imagePath)),
+              child: image,
             ),
           ),
         ),

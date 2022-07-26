@@ -1,7 +1,11 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
+
 import './models/detail_screen.dart';
+import './widgets/list_item.dart';
 
 void main() {
   runApp(const Main());
@@ -19,7 +23,7 @@ class Main extends StatelessWidget {
           bodyText1: const TextStyle(
             fontFamily: 'Quicksand',
             fontStyle: FontStyle.italic,
-            fontSize: 15,
+            fontSize: 18,
           ),
         ),
     appBarTheme: AppBarTheme(
@@ -37,7 +41,7 @@ class Main extends StatelessWidget {
           .copyWith(
             headline6: const TextStyle(
               fontFamily: 'Quicksand',
-              fontSize: 20,
+              fontSize: 21,
             ),
           )
           .headline6,
@@ -95,14 +99,15 @@ class _MyHomePageState extends State<MyHomePage> {
       'https://api.unsplash.com/photos/?client_id=ab3411e4ac868c2646c0ed488dfd919ef612b04c264f3374c97fff98ed253dc9');
   bool _showImg = false;
 
-  getImages() async {
+  Future<void> getImages() async {
     http.Response response = await http.get(_url);
     List<dynamic> imgData = json.decode(response.body);
 
     for (var prop in imgData) {
       _images.add({
         'author': prop['user']['name'],
-        'imageUrl': prop['urls']['regular'],
+        'fullImage': Image(image: NetworkImage(prop['urls']['regular'])),
+        'thumbImage': Image(image: NetworkImage(prop['urls']['small_s3'])),
       });
     }
     setState(() {
@@ -120,58 +125,84 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Scrollbar(
-        child: ListView.separated(
-          itemCount: _images.length,
-          separatorBuilder: (BuildContext context, int index) => const Divider(
-            color: Colors.black54,
-          ),
-          itemBuilder: (BuildContext context, int index) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      child: !_showImg
-                          ? const CircularProgressIndicator(
-                              color: Colors.black,
-                            )
-                          : Image(
-                              image: NetworkImage(
-                                  _images[index]['imageUrl'] as String),
-                            ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return DetailScreen(
-                                imagePath: _images[index]['imageUrl'],
-                              );
-                            },
+      body: !_showImg
+          ? Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: ListView.builder(
+                itemCount: 10,
+                // separatorBuilder: (BuildContext context, int index) => const Divider(
+                //   color: Colors.black54,
+                // ),
+                itemBuilder: (_, __) => Padding(
+                  padding: const EdgeInsets.all(11.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(40),
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Container(
-                      alignment: Alignment.centerRight,
-                      margin: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        'Author: ${_images[index]['author']}',
-                        style: Theme.of(context).textTheme.bodyText1,
+                        ),
+                        width: 48.0,
+                        height: 48.0,
+                        // color: Colors.white,
                       ),
-                    ),
-                  ],
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              width: double.infinity,
+                              height: 18.0,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            );
-          },
-        ),
-      ),
+            )
+          : Scrollbar(
+              child: ListView.builder(
+                itemCount: _images.length,
+                // separatorBuilder: (BuildContext context, int index) => const Divider(
+                //   color: Colors.black54,
+                // ),
+                itemBuilder: (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      GestureDetector(
+                        child: ListItem(
+                          author: _images[index]['author'],
+                          avatar: _images[index]['thumbImage'],
+                          showImg: _showImg,
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return DetailScreen(
+                                  image: _images[index]['fullImage'],
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
     );
   }
 }
